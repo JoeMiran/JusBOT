@@ -1,4 +1,5 @@
 import os
+import time
 import google.generativeai as genai  # <--- Faltava este import crucial
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
@@ -45,6 +46,36 @@ def validar_modelo_google():
     except Exception as e:
         print(f"AVISO: Não foi possível listar modelos ({e}). Tentando 'gemini-1.5-flash' padrão.")
         return 'gemini-1.5-flash'
+
+def validar_modelo_embedding():
+    """
+    Função de diagnóstico: Descobre dinamicamente qual modelo de embedding
+    está disponível para a sua chave de API.
+    """
+    print("--- DIAGNÓSTICO DO MODELO DE EMBEDDING ---")
+    try:
+        modelos = list(genai.list_models())
+        # Filtra apenas modelos que suportam a criação de embeddings
+        modelos_embedding = [m.name for m in modelos if 'embedContent' in m.supported_generation_methods]
+        print(f"Modelos de embedding disponíveis: {modelos_embedding}")
+        
+        # Tenta usar o mais moderno primeiro
+        if 'models/text-embedding-004' in modelos_embedding:
+            return 'models/text-embedding-004'
+        elif 'models/embedding-001' in modelos_embedding:
+            return 'models/embedding-001'
+        elif modelos_embedding:
+            # Retorna o primeiro da lista como fallback
+            return modelos_embedding[0] 
+        else:
+            return 'models/text-embedding-004' # Fallback final cego
+            
+    except Exception as e:
+        print(f"AVISO: Não foi possível listar modelos de embedding ({e}).")
+        return 'models/text-embedding-004'
+
+MODELO_EMBEDDING_SELECIONADO = validar_modelo_embedding()
+print(f"--- EMBEDDING QUE SERÁ USADO: {MODELO_EMBEDDING_SELECIONADO} ---")
 
 # --- DEFINIÇÃO DO MODELO ---
 # Executamos a validação agora para saber qual modelo usar lá embaixo
@@ -102,8 +133,13 @@ def obter_banco_vetorial():
     global banco_vetorial_ativo
     
     # Modelo de Embeddings do Google (Esse geralmente não muda)
-    modelo_embedding = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-
+    # modelo_embedding = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    modelo_embedding = GoogleGenerativeAIEmbeddings(
+        model=MODELO_EMBEDDING_SELECIONADO, # Usando o modelo descoberto dinamicamente
+        google_api_key=CHAVE_API,
+        task_type="retrieval_document"
+    )
+    
     # Singleton: Se já carregamos na memória, retorna direto
     if banco_vetorial_ativo:
         return banco_vetorial_ativo
@@ -122,13 +158,29 @@ def obter_banco_vetorial():
         return None
 
     try:
-        banco_vetorial_ativo = Chroma.from_documents(
-            documents=chunks,
-            embedding=modelo_embedding,
+        # 1. Inicializa o banco conectando ao diretório vazio
+        banco_vetorial_ativo = Chroma(
+            embedding_function=modelo_embedding,
             persist_directory=DIRETORIO_BANCO
         )
+        
+        # 2. Divide os chunks em lotes de 80 (limite seguro abaixo de 100/min)
+        tamanho_lote = 80
+        for i in range(0, len(chunks), tamanho_lote):
+            lote = chunks[i : i + tamanho_lote]
+            print(f"Indexando lote de {i} a {i + len(lote)} (Total: {len(chunks)} trechos)...")
+            
+            # Adiciona o lote atual ao banco de dados
+            banco_vetorial_ativo.add_documents(lote)
+            
+            # 3. Pausa de 65 segundos se ainda houver mais lotes para processar
+            if i + tamanho_lote < len(chunks):
+                print("⏳ Limite da API Gratuita: Pausando 65 segundos antes do próximo lote...")
+                time.sleep(65)
+
         print("--- Banco salvo com sucesso! ---")
         return banco_vetorial_ativo
+        
     except Exception as e:
         print(f"Erro ao criar embeddings: {e}")
         return None
