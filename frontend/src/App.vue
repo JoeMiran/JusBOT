@@ -6,7 +6,7 @@ const question = ref('')
 const messages = ref([
   { 
     role: 'assistant', 
-    text: 'Prezado(a). Sou o JusAI.\nPossuo acesso à Constituição, CDC, CPC e LGPD. Como posso auxiliá-lo juridicamente hoje?',
+    text: 'Olá, colaborador(a). \nSou o Assistente de Governança.\nTenho acesso às diretrizes oficiais do banco, incluindo o Código de Ética, Política de Privacidade e Compromisso com Direitos Humanos. Como posso esclarecer nossas normas de conduta hoje?',
     mode: 'rag'
   }
 ])
@@ -59,7 +59,7 @@ const sendMessage = async () => {
             JusAI
           </h1>
           <p class="text-[10px] text-gray-500 font-ui uppercase tracking-[0.3em] mt-1">
-            Inteligência Jurídica UFPA
+            Assistente de Políticas Internas
           </p>
         </div>
       </div>
@@ -76,7 +76,7 @@ const sendMessage = async () => {
             :class="isRagEnabled ? 'translate-x-6' : 'translate-x-0'"
           ></div>
         </button>
-        <span :class="isRagEnabled ? 'text-jus-gold font-bold' : 'text-gray-600'">Acervo Jurídico</span>
+        <span :class="isRagEnabled ? 'text-jus-gold font-bold' : 'text-gray-600'">Políticas Internas</span>
       </div>
     </header>
 
@@ -96,7 +96,7 @@ const sendMessage = async () => {
             <div class="flex items-center gap-3 mb-4 border-b border-gray-800 pb-2">
               <span class="text-jus-gold text-lg">§</span>
               <p class="text-xs text-jus-gold font-ui uppercase tracking-widest">
-                JusAI &bull; {{ msg.mode === 'rag' ? 'Consulta Processual' : 'Conhecimento Aberto' }}
+                JusAI &bull; {{ msg.mode === 'rag' ? 'Consulta de Políticas Internas' : 'Conhecimento Aberto' }}
               </p>
             </div>
             <div class="text-lg text-gray-300 leading-8 text-justify font-serif">
@@ -129,7 +129,7 @@ const sendMessage = async () => {
           @keyup.enter="sendMessage"
           :disabled="loading"
           type="text" 
-          placeholder="Digite a consulta jurídica..." 
+          placeholder="Descreva sua dúvida sobre ética ou compliance..." 
           class="w-full bg-transparent text-gray-200 placeholder-gray-700 px-6 py-4 focus:outline-none font-serif text-lg"
         >
         <button 
