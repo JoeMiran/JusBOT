@@ -1,6 +1,6 @@
 import os
 import time
-import google.generativeai as genai  # <--- Faltava este import crucial
+import google.generativeai as genai
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -8,27 +8,27 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage, SystemMessage
 
-# --- CONFIGURAÇÃO INICIAL ---
+# --- CONFIGURACAO INICIAL ---
 load_dotenv()
 CHAVE_API = os.environ.get("GOOGLE_API_KEY")
 
 if not CHAVE_API:
-    raise ValueError("ERRO: Chave GOOGLE_API_KEY não encontrada no arquivo .env")
+    raise ValueError("ERRO: Chave GOOGLE_API_KEY nao encontrada no arquivo .env")
 
-# Configura a biblioteca nativa do Google para diagnóstico
+# Configura a biblioteca nativa do Google para diagnostico
 genai.configure(api_key=CHAVE_API)
 
 def validar_modelo_google():
     """
-    Função de diagnóstico: Lista os modelos disponíveis para sua chave
+    Funcao de diagnostico: Lista os modelos disponiveis para sua chave
     e define qual usar para evitar erros 404.
     """
-    print("--- DIAGNÓSTICO DO GOOGLE GEMINI ---")
+    print("--- DIAGNOSTICO DO GOOGLE GEMINI ---")
     try:
         modelos = list(genai.list_models())
         # Filtra apenas modelos que geram texto
         nomes_modelos = [m.name for m in modelos if 'generateContent' in m.supported_generation_methods]
-        print(f"Modelos disponíveis para sua chave: {nomes_modelos}")
+        print(f"Modelos disponiveis para sua chave: {nomes_modelos}")
         
         # Tenta usar o mais moderno primeiro
         if 'models/gemini-1.5-flash' in nomes_modelos:
@@ -36,7 +36,7 @@ def validar_modelo_google():
         elif 'models/gemini-pro' in nomes_modelos:
             return 'gemini-pro'
         else:
-            # Pega o primeiro disponível como fallback e limpa o prefixo 'models/'
+            # Pega o primeiro disponivel como fallback e limpa o prefixo 'models/'
             if nomes_modelos:
                 nome_limpo = nomes_modelos[0].replace('models/', '')
                 return nome_limpo
@@ -44,20 +44,20 @@ def validar_modelo_google():
                 return 'gemini-1.5-flash' # Fallback final
             
     except Exception as e:
-        print(f"AVISO: Não foi possível listar modelos ({e}). Tentando 'gemini-1.5-flash' padrão.")
+        print(f"AVISO: Nao foi possivel listar modelos ({e}). Tentando 'gemini-1.5-flash' padrao.")
         return 'gemini-1.5-flash'
 
 def validar_modelo_embedding():
     """
-    Função de diagnóstico: Descobre dinamicamente qual modelo de embedding
-    está disponível para a sua chave de API.
+    Funcao de diagnostico: Descobre dinamicamente qual modelo de embedding
+    esta disponivel para a sua chave de API.
     """
-    print("--- DIAGNÓSTICO DO MODELO DE EMBEDDING ---")
+    print("--- DIAGNOSTICO DO MODELO DE EMBEDDING ---")
     try:
         modelos = list(genai.list_models())
-        # Filtra apenas modelos que suportam a criação de embeddings
+        # Filtra apenas modelos que suportam a criacao de embeddings
         modelos_embedding = [m.name for m in modelos if 'embedContent' in m.supported_generation_methods]
-        print(f"Modelos de embedding disponíveis: {modelos_embedding}")
+        print(f"Modelos de embedding disponiveis: {modelos_embedding}")
         
         # Tenta usar o mais moderno primeiro
         if 'models/text-embedding-004' in modelos_embedding:
@@ -71,35 +71,35 @@ def validar_modelo_embedding():
             return 'models/text-embedding-004' # Fallback final cego
             
     except Exception as e:
-        print(f"AVISO: Não foi possível listar modelos de embedding ({e}).")
+        print(f"AVISO: Nao foi possivel listar modelos de embedding ({e}).")
         return 'models/text-embedding-004'
 
 MODELO_EMBEDDING_SELECIONADO = validar_modelo_embedding()
-print(f"--- EMBEDDING QUE SERÁ USADO: {MODELO_EMBEDDING_SELECIONADO} ---")
+print(f"--- EMBEDDING QUE SERA USADO: {MODELO_EMBEDDING_SELECIONADO} ---")
 
-# --- DEFINIÇÃO DO MODELO ---
-# Executamos a validação agora para saber qual modelo usar lá embaixo
+# --- DEFINICAO DO MODELO ---
+# Executamos a validacao agora para saber qual modelo usar la embaixo
 MODELO_SELECIONADO = validar_modelo_google()
-print(f"--- MODELO QUE SERÁ USADO: {MODELO_SELECIONADO} ---")
+print(f"--- MODELO QUE SERA USADO: {MODELO_SELECIONADO} ---")
 
 # Caminhos das pastas
 DIRETORIO_PDFS = "./data"
 DIRETORIO_BANCO = "./vector_db"
 
-# Variável global para guardar o banco carregado na memória
+# Variavel global para guardar o banco carregado na memoria
 banco_vetorial_ativo = None
 
 def carregar_e_processar_pdfs():
     """
-    ETAPA 1: INGESTÃO E CORTE (CHUNKING)
-    Lê todos os PDFs da pasta data e divide em pedaços menores.
+    ETAPA 1: INGESTAO E CORTE (CHUNKING)
+    Le todos os PDFs da pasta data e divide em pedacos menores.
     """
-    print(f"--- 1. INICIANDO INGESTÃO DE DOCUMENTOS EM: {DIRETORIO_PDFS} ---")
+    print(f"--- 1. INICIANDO INGESTAO DE DOCUMENTOS EM: {DIRETORIO_PDFS} ---")
     
     # Garante que a pasta existe
     if not os.path.exists(DIRETORIO_PDFS):
         os.makedirs(DIRETORIO_PDFS)
-        print(f"Pasta {DIRETORIO_PDFS} criada. Coloque seus PDFs nela.")
+        print(f"Pasta {DIRETORIO_PDFS} criada. Coloque os documentos internos nela.")
         return []
 
     todos_documentos = []
@@ -118,39 +118,38 @@ def carregar_e_processar_pdfs():
         except Exception as e:
             print(f"Erro ao ler {arquivo}: {e}")
 
-    # Divisão em Chunks (Pedaços)
+    # Divisao em Chunks (Pedacos)
     divisor = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
     chunks_processados = divisor.split_documents(todos_documentos)
     
-    print(f"--- Processamento concluído: {len(chunks_processados)} trechos criados. ---")
+    print(f"--- Processamento concluido: {len(chunks_processados)} trechos criados. ---")
     return chunks_processados
 
 def obter_banco_vetorial():
     """
-    ETAPA 2: INDEXAÇÃO (EMBEDDING)
-    Transforma texto em números e salva no ChromaDB.
+    ETAPA 2: INDEXACAO (EMBEDDING)
+    Transforma texto em numeros e salva no ChromaDB.
     """
     global banco_vetorial_ativo
     
-    # Modelo de Embeddings do Google (Esse geralmente não muda)
-    # modelo_embedding = GoogleGenerativeAIEmbeddings(model="models/text-embedding-004")
+    # Modelo de Embeddings do Google descoberto dinamicamente
     modelo_embedding = GoogleGenerativeAIEmbeddings(
-        model=MODELO_EMBEDDING_SELECIONADO, # Usando o modelo descoberto dinamicamente
+        model=MODELO_EMBEDDING_SELECIONADO, 
         google_api_key=CHAVE_API,
         task_type="retrieval_document"
     )
     
-    # Singleton: Se já carregamos na memória, retorna direto
+    # Singleton: Se ja carregamos na memoria, retorna direto
     if banco_vetorial_ativo:
         return banco_vetorial_ativo
 
-    # Se o banco já existe no disco, apenas carrega
+    # Se o banco ja existe no disco, apenas carrega
     if os.path.exists(DIRETORIO_BANCO) and os.listdir(DIRETORIO_BANCO):
         print("--- 2. CARREGANDO BANCO VETORIAL EXISTENTE ---")
         banco_vetorial_ativo = Chroma(persist_directory=DIRETORIO_BANCO, embedding_function=modelo_embedding)
         return banco_vetorial_ativo
     
-    # Se não existe, cria do zero
+    # Se nao existe, cria do zero
     print("--- 2. CRIANDO NOVO BANCO VETORIAL (INDEXANDO)... ---")
     chunks = carregar_e_processar_pdfs()
     
@@ -158,7 +157,7 @@ def obter_banco_vetorial():
         return None
 
     try:
-        # 1. Inicializa o banco conectando ao diretório vazio
+        # 1. Inicializa o banco conectando ao diretorio vazio
         banco_vetorial_ativo = Chroma(
             embedding_function=modelo_embedding,
             persist_directory=DIRETORIO_BANCO
@@ -175,7 +174,7 @@ def obter_banco_vetorial():
             
             # 3. Pausa de 65 segundos se ainda houver mais lotes para processar
             if i + tamanho_lote < len(chunks):
-                print("⏳ Limite da API Gratuita: Pausando 65 segundos antes do próximo lote...")
+                print("Limite da API Gratuita: Pausando 65 segundos antes do proximo lote...")
                 time.sleep(65)
 
         print("--- Banco salvo com sucesso! ---")
@@ -187,7 +186,7 @@ def obter_banco_vetorial():
 
 def buscar_contexto(pergunta):
     """
-    ETAPA 3: RECUPERAÇÃO (RETRIEVAL)
+    ETAPA 3: RECUPERACAO (RETRIEVAL)
     Busca os trechos mais parecidos com a pergunta.
     """
     banco = obter_banco_vetorial()
@@ -208,20 +207,24 @@ def buscar_contexto(pergunta):
             fonte_nome = os.path.basename(doc.metadata.get('source', 'Desconhecido'))
             pagina = doc.metadata.get('page', 0)
             
-            texto_contexto += f"\n---\nFONTE: {fonte_nome} (Pág {pagina})\nCONTEÚDO: {conteudo_limpo}\n"
-            fontes.append(f"{fonte_nome} - Pág. {pagina}")
+            texto_contexto += f"\n---\nFONTE: {fonte_nome} (Pag {pagina})\nCONTEUDO: {conteudo_limpo}\n"
+            fontes.append(f"{fonte_nome} - Pag. {pagina}")
             
         return texto_contexto, fontes
     except Exception as e:
         print(f"Erro na busca: {e}")
         return "", []
 
+<<<<<<< HEAD
 def perguntar_ao_itau_bot(pergunta, usar_rag=True):
+=======
+def perguntar_ao_compliance_bot(pergunta, usar_rag=True):
+>>>>>>> cbb4623cf8e47606c74d47ad9ebced543e17945c
     """
-    ETAPA 4: GERAÇÃO (GENERATION)
+    ETAPA 4: GERACAO (GENERATION)
     Envia o contexto + pergunta para a IA gerar a resposta.
     """
-    # Usamos o modelo validado dinamicamente no início do script
+    # Usamos o modelo validado dinamicamente no inicio do script
     llm = ChatGoogleGenerativeAI(model=MODELO_SELECIONADO, temperature=0.2)
     
     contexto = ""
@@ -231,6 +234,7 @@ def perguntar_ao_itau_bot(pergunta, usar_rag=True):
         contexto, lista_fontes = buscar_contexto(pergunta)
     
     if usar_rag and contexto:
+<<<<<<< HEAD
         # Instruções para o modo Especialista
         instrucao_sistema = """Você é o Assistente de Políticas Internas do Itaú, um assistente corporativo sênior e formal.
         Sua base de conhecimento são os documentos e normativas internas do banco fornecidos no contexto.
@@ -245,6 +249,21 @@ def perguntar_ao_itau_bot(pergunta, usar_rag=True):
     else:
         # Modo Genérico
         instrucao_sistema = "Você é o Assistente de RH/Políticas do Itaú. Responda dúvidas corporativas com base em seu conhecimento geral, mas avise que não está consultando as diretrizes internas específicas do banco no momento."
+=======
+        instrucao_sistema = """Voce e o Assistente de Governanca e Compliance do Itau.
+        Sua funcao e auxiliar os colaboradores com base estritamente nas normas e politicas internas fornecidas.
+        
+        REGRAS:
+        1. Use APENAS o contexto fornecido para basear sua resposta.
+        2. Cite os documentos ou diretrizes mencionados no contexto.
+        3. Se a resposta nao constar no contexto, diga: "Nao encontrei essa diretriz nos documentos internos analisados."
+        4. Mantenha um tom profissional, orientativo e alinhado aos valores corporativos."""
+        
+        mensagem_usuario = f"DOCUMENTOS INTERNOS:\n{contexto}\n\nDUVIDA DO COLABORADOR: {pergunta}"
+    else:
+        # Modo Generico
+        instrucao_sistema = "Voce e o Assistente de Governanca do Itau. Responda duvidas sobre etica corporativa com base em seu conhecimento geral, mas deixe claro que nao esta consultando as diretrizes oficiais do banco no momento."
+>>>>>>> cbb4623cf8e47606c74d47ad9ebced543e17945c
         mensagem_usuario = pergunta
 
     print("--- 4. GERANDO RESPOSTA NA LLM... ---")
@@ -265,5 +284,4 @@ def perguntar_ao_itau_bot(pergunta, usar_rag=True):
             "sources": []
         }
 
-# Inicializa o banco ao rodar o arquivo
 obter_banco_vetorial()
