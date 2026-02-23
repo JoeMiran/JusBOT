@@ -1,7 +1,6 @@
 @import "tailwindcss";
 
 @theme {
-<<<<<<< HEAD
   /* Recriando as cores no padrão Tailwind v4 */
   --color-itau-orange: #EC7000;
   --color-itau-blue: #004990;
@@ -14,20 +13,5 @@ body {
   background-color: #f9fafb;
   font-family: var(--font-corporate);
   color: var(--color-itau-blue);
-=======
-  --color-itau-orange: #EC7000;
-  --color-itau-blue: #003399;
-  --color-itau-dark-blue: #051933;
-  --color-itau-gray: #F2F2F2;
-  --color-itau-text: #1F1F1F;
-  --font-itau: "Helvetica Neue", Helvetica, Arial, sans-serif;
-}
-
-body {
-  /* Fundo agora é predominantemente laranja sutil ou cinza muito quente */
-  background-color: #fdf2e9; 
-  font-family: var(--font-itau);
-  color: var(--color-itau-text);
->>>>>>> cbb4623cf8e47606c74d47ad9ebced543e17945c
   -webkit-font-smoothing: antialiased;
 }

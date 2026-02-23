@@ -215,11 +215,7 @@ def buscar_contexto(pergunta):
         print(f"Erro na busca: {e}")
         return "", []
 
-<<<<<<< HEAD
 def perguntar_ao_itau_bot(pergunta, usar_rag=True):
-=======
-def perguntar_ao_compliance_bot(pergunta, usar_rag=True):
->>>>>>> cbb4623cf8e47606c74d47ad9ebced543e17945c
     """
     ETAPA 4: GERACAO (GENERATION)
     Envia o contexto + pergunta para a IA gerar a resposta.
@@ -234,7 +230,6 @@ def perguntar_ao_compliance_bot(pergunta, usar_rag=True):
         contexto, lista_fontes = buscar_contexto(pergunta)
     
     if usar_rag and contexto:
-<<<<<<< HEAD
         # Instruções para o modo Especialista
         instrucao_sistema = """Você é o Assistente de Políticas Internas do Itaú, um assistente corporativo sênior e formal.
         Sua base de conhecimento são os documentos e normativas internas do banco fornecidos no contexto.
@@ -249,21 +244,6 @@ def perguntar_ao_compliance_bot(pergunta, usar_rag=True):
     else:
         # Modo Genérico
         instrucao_sistema = "Você é o Assistente de RH/Políticas do Itaú. Responda dúvidas corporativas com base em seu conhecimento geral, mas avise que não está consultando as diretrizes internas específicas do banco no momento."
-=======
-        instrucao_sistema = """Voce e o Assistente de Governanca e Compliance do Itau.
-        Sua funcao e auxiliar os colaboradores com base estritamente nas normas e politicas internas fornecidas.
-        
-        REGRAS:
-        1. Use APENAS o contexto fornecido para basear sua resposta.
-        2. Cite os documentos ou diretrizes mencionados no contexto.
-        3. Se a resposta nao constar no contexto, diga: "Nao encontrei essa diretriz nos documentos internos analisados."
-        4. Mantenha um tom profissional, orientativo e alinhado aos valores corporativos."""
-        
-        mensagem_usuario = f"DOCUMENTOS INTERNOS:\n{contexto}\n\nDUVIDA DO COLABORADOR: {pergunta}"
-    else:
-        # Modo Generico
-        instrucao_sistema = "Voce e o Assistente de Governanca do Itau. Responda duvidas sobre etica corporativa com base em seu conhecimento geral, mas deixe claro que nao esta consultando as diretrizes oficiais do banco no momento."
->>>>>>> cbb4623cf8e47606c74d47ad9ebced543e17945c
         mensagem_usuario = pergunta
 
     print("--- 4. GERANDO RESPOSTA NA LLM... ---")
