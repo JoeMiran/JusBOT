@@ -1,10 +1,9 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-# Importa a nova função com nome em português
-from rag_engine import perguntar_ao_jusai
+from rag_engine import perguntar_ao_compliance_bot
 
-app = FastAPI(title="JusAI API")
+app = FastAPI(title="CompBOT API")
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,8 +20,7 @@ class QueryRequest(BaseModel):
 @app.post("/ask")
 def query_endpoint(request: QueryRequest):
     try:
-        # Chama a função em português
-        result = perguntar_ao_jusai(request.question, usar_rag=request.use_rag)
+        result = perguntar_ao_compliance_bot(request.question, usar_rag=request.use_rag)
         return result
     except Exception as e:
         print(f"ERRO API: {e}")
@@ -30,4 +28,4 @@ def query_endpoint(request: QueryRequest):
 
 @app.get("/")
 def health_check():
-    return {"status": "JusAI operando"}
+    return {"status": "CompBOT operando"}

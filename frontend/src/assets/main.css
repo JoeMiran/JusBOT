@@ -1,23 +1,18 @@
 @import "tailwindcss";
 
 @theme {
-  /* CORES: Paleta Sóbria (Preto, Cinza Chumbo e Ouro Nobre) */
-  --color-jus-black: #0a0a0a;       /* Fundo principal (Preto fosco) */
-  --color-jus-gray-dark: #171717;   /* Containers (Cinza muito escuro) */
-  --color-jus-gray-light: #262626;  /* Elementos secundários */
-  
-  --color-jus-gold: #EC7000;        /* Dourado metálico/envelhecido (Elegante) */
-  --color-jus-gold-dim: #6b5730;    /* Dourado escuro para bordas discretas */
-  
-  /* TIPOGRAFIA: Clássica */
-  --font-legal: "Times New Roman", Garamond, "Palatino Linotype", serif;
-  --font-ui: "Helvetica Neue", Arial, sans-serif; /* Apenas para etiquetas técnicas */
+  --color-itau-orange: #EC7000;
+  --color-itau-blue: #003399;
+  --color-itau-dark-blue: #051933;
+  --color-itau-gray: #F2F2F2;
+  --color-itau-text: #1F1F1F;
+  --font-itau: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-/* Configuração Global */
 body {
-  background-color: var(--color-jus-black);
-  font-family: var(--font-legal);
-  color: #d4d4d4;
+  /* Fundo agora é predominantemente laranja sutil ou cinza muito quente */
+  background-color: #fdf2e9; 
+  font-family: var(--font-itau);
+  color: var(--color-itau-text);
   -webkit-font-smoothing: antialiased;
 }
