@@ -7,9 +7,12 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Adicionando um dourado personalizado para o JusAI
-        'jus-gold': '#d4af37', 
-        'jus-dark': '#0f172a',
+        // Paleta Corporativa Itaú (Clara)
+        'itau-orange': '#EC7000',
+        'itau-blue': '#004990',
+      },
+      fontFamily: {
+        'corporate': ['Inter', 'Helvetica Neue', 'Arial', 'sans-serif'],
       }
     },
   },

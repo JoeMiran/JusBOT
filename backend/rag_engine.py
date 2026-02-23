@@ -216,7 +216,7 @@ def buscar_contexto(pergunta):
         print(f"Erro na busca: {e}")
         return "", []
 
-def perguntar_ao_jusai(pergunta, usar_rag=True):
+def perguntar_ao_itau_bot(pergunta, usar_rag=True):
     """
     ETAPA 4: GERAÇÃO (GENERATION)
     Envia o contexto + pergunta para a IA gerar a resposta.
@@ -232,19 +232,19 @@ def perguntar_ao_jusai(pergunta, usar_rag=True):
     
     if usar_rag and contexto:
         # Instruções para o modo Especialista
-        instrucao_sistema = """Você é o JusAI, um assistente jurídico sênior e formal.
-        Sua base de conhecimento são as leis brasileiras fornecidas no contexto.
+        instrucao_sistema = """Você é o Assistente de Políticas Internas do Itaú, um assistente corporativo sênior e formal.
+        Sua base de conhecimento são os documentos e normativas internas do banco fornecidos no contexto.
         
         REGRAS:
         1. Use APENAS o contexto fornecido para responder.
-        2. Cite explicitamente a lei ou artigo mencionado no contexto.
-        3. Se a resposta não estiver no contexto, diga: "Não encontrei essa informação nos documentos legais analisados."
-        4. Mantenha um tom sóbrio, profissional e direto."""
+        2. Cite explicitamente a diretriz, norma ou documento mencionado no contexto.
+        3. Se a resposta não estiver no contexto, diga: "Não encontrei essa informação nas políticas internas analisadas."
+        4. Mantenha um tom sóbrio, profissional, corporativo e direto."""
         
-        mensagem_usuario = f"CONTEXTO LEGISLATIVO:\n{contexto}\n\nPERGUNTA DO USUÁRIO: {pergunta}"
+        mensagem_usuario = f"CONTEXTO CORPORATIVO:\n{contexto}\n\nPERGUNTA DO COLABORADOR: {pergunta}"
     else:
         # Modo Genérico
-        instrucao_sistema = "Você é o JusAI. Responda dúvidas jurídicas com base em seu conhecimento geral, mas avise que não está consultando a lei específica no momento."
+        instrucao_sistema = "Você é o Assistente de RH/Políticas do Itaú. Responda dúvidas corporativas com base em seu conhecimento geral, mas avise que não está consultando as diretrizes internas específicas do banco no momento."
         mensagem_usuario = pergunta
 
     print("--- 4. GERANDO RESPOSTA NA LLM... ---")
