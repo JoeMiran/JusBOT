@@ -8,7 +8,6 @@ from langchain_google_genai import GoogleGenerativeAIEmbeddings, ChatGoogleGener
 from langchain_chroma import Chroma
 from langchain_core.messages import HumanMessage, SystemMessage
 
-# --- CONFIGURACAO INICIAL ---
 load_dotenv()
 CHAVE_API = os.environ.get("GOOGLE_API_KEY")
 
@@ -19,14 +18,9 @@ if not CHAVE_API:
 genai.configure(api_key=CHAVE_API)
 
 def validar_modelo_google():
-    """
-    Funcao de diagnostico: Lista os modelos disponiveis para sua chave
-    e define qual usar para evitar erros 404.
-    """
     print("--- DIAGNOSTICO DO GOOGLE GEMINI ---")
     try:
         modelos = list(genai.list_models())
-        # Filtra apenas modelos que geram texto
         nomes_modelos = [m.name for m in modelos if 'generateContent' in m.supported_generation_methods]
         print(f"Modelos disponiveis para sua chave: {nomes_modelos}")
         
